@@ -1,0 +1,26 @@
+---
+- name: connect linux machine / ssh   # label / metadata / info
+  connection: ansible.builtin.ssh     # this is a default connection plugin
+  hosts: planetexpress                # targets (def by inventory)
+  gather_facts: yes                   # audit target system & populate ansible_facts
+
+  # setting state
+  tasks:
+
+    - name: show the value of ansible_facts
+      ansible.builtin.debug:        
+        var: ansible_facts        # this was gathered by gather_facts
+
+    - name: show the value of ansible_facts
+      ansible.builtin.debug:
+        var: ansible_facts.default_ipv4.address    # this was gathered by gather_facts
+
+
+    - name: show the value of ansible_facts      
+      ansible.builtin.debug:     
+        var: ansible_facts.get('default_ipv4', '0.0.0.0')   # this was gathered by gather_facts
+
+    - name: copy a file from controller to planetexpress
+      ansible.builtin.copy:
+        src: moveme.txt   # file on controller to copy to planetexpress
+        dest: /tmp/moveme.txt  # where to place on planet express

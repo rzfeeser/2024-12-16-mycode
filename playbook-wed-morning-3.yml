@@ -1,0 +1,30 @@
+---
+- name: connect to an l2 device
+  hosts: sw-1
+  connection: ansible.builtin.network_cli  # https://docs.ansible.com/ansible/latest/network/user_guide/platform_index.html#settings-by-platform
+  gather_facts: yes  # works in ssh or network_cli mode
+
+  vars:
+    ansible_network_os: arista.eos.eos
+    ansible_user: admin
+    ansible_password: alta3
+
+  tasks:
+    - name: display the gathered facts
+      ansible.builtin.debug:
+        var: ansible_facts
+
+    - name: Apply the provided configuration
+      arista.eos.eos_hostname:
+        config:
+          hostname: sw-1-zach
+        state: merged
+      become: yes
+
+
+    - name: grab switch config
+      arista.eos.eos_facts:
+    
+    - name: display the gathered facts
+      ansible.builtin.debug:
+        var: ansible_facts

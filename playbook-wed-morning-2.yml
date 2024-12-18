@@ -1,0 +1,16 @@
+---
+- name: connect to an api                  # name / metadata / info
+  connection: ansible.builtin.local        # only run on local ansible controller
+  hosts: localhost
+  gather_facts: no
+
+  tasks:
+    - name: make lookup to api
+      ansible.builtin.uri:   # send HTTP message
+        url: http://api.open-notify.org/iss-now.json
+        method: GET
+      register: result       # creating a var to save in
+
+    - name: show results
+      ansible.builtin.debug:
+        var: result.json
