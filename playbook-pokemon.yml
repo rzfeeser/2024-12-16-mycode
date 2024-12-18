@@ -1,0 +1,37 @@
+---
+- name: get pokemon data
+  connection: local
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+
+    - name: make api request
+      ansible.builtin.uri:
+        method: GET
+        url: https://pokeapi.co/api/v2/pokemon/pikachu
+      register: resp
+
+    - name: set a new variable
+      ansible.builtin.set_fact:
+        pikachu: "{{ resp.json }}"
+
+    - debug:
+        var: pikachu.keys()
+
+    - name: show abilities
+      ansible.builtin.debug:
+        var: pikachu.abilities[0].ability.name  # static
+
+    - name: show abilities
+      ansible.builtin.debug:
+        var: pikachu.abilities[1].ability.name  # lightning rod
+
+    - name: show abilities
+      ansible.builtin.debug:
+        var: item.ability.name
+      loop: "{{ pikachu.abilities }}"
+
+    - name: map test
+      ansible.builtin.debug:
+        msg: "{{  | map('extract', pikachu.abilities) | list }}"

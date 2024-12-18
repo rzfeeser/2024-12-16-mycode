@@ -1,0 +1,21 @@
+---
+- name: audit switch
+  connection: ansible.builtin.network_cli
+  hosts: switches
+  gather_facts: no
+  become_method: enable
+
+  vars:
+    ansible_user: admin
+    ansible_ssh_pass: alta3
+
+  tasks:
+    - name: get facts from Arista devices
+      arista.eos.eos_facts:
+      register: results
+      when: ansible_network_os == 'eos'
+      become: yes
+
+
+    - debug:
+        var: results
