@@ -1,0 +1,54 @@
+---
+- name: Network Agnostic Playbook 
+  hosts: aristaswitchessecure
+  gather_facts: yes # should work against any supported network_cli dev
+  connection: ansible.builtin.network_cli # also mapped in inv
+
+  vars:
+    ansible_ssh_pass: alta3
+    dnsserver: "8.8.8.8"
+  
+  tasks: 
+
+  - name: PRECHECK STEP - running the correct version???
+    ansible.builtin.assert:
+      that:
+        - ansible_facts.net_version == "4.22.0F"
+
+
+
+  - name: CONFIGURE DNS 
+    ansible.netcommon.cli_config: 
+      config: ip name-server {{ dnsserver }}
+
+  - name: CHECK CONFIGURATION 
+    ansible.netcommon.cli_command: 
+      command: show run | i ip name-server 
+    register: results 
+
+    # Turning off our debug statement.
+    # We no longer need this step as we now know what we're looking for
+  - name: PRINT OUTPUT TO SCREEN 
+    ansible.builtin.debug: 
+      var: results.stdout
+      verbosity: 1  # at runtime -v must be set to see this debug step
+
+    # Let's create a new variable based on some dynamic data.
+    # If our command worked, we know it should respond ip name-server vrf default www.xxx.yy.zzz
+    # Where www.xxx.yyy.zzz should be the IP address passed to our playbook for dnsserver
+  - name: set a new var named "expected_output"
+    ansible.builtin.set_fact:
+      expected_output: "ip name-server vrf default {{ dnsserver }}"
+
+    # now perform our post-check. We want the playbook to FAIL if we didn't get our expected output
+  - name: POST CHECK - did our DNS get set correctly
+    ansible.builtin.fail:
+      msg: "failing - output does not match expected_output!"
+    when: expected_output not in results.stdout
+
+  # assert can do anything fail does
+  # just invert the logic check    
+  - name: POST CHECK - perform the SAME check with assert
+    ansible.builtin.assert:
+      that:
+        - expected_output in results.stdout

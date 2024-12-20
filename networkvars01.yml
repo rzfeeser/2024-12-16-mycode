@@ -1,0 +1,23 @@
+---
+- name: Network Agnostic Playbook 
+  hosts: aristaswitchessecure # group name from inv
+  gather_facts: no
+  connection: ansible.builtin.network_cli # this is mapped in the inv
+  
+  vars:
+    ansible_ssh_pass: alta3   # best to use extra var at runtime for this
+  
+  tasks: 
+  - name: CONFIGURE DNS 
+    ansible.netcommon.cli_config: 
+      config: ip name-server 8.8.8.8
+
+  - name: CHECK CONFIGURATION 
+    ansible.netcommon.cli_command: 
+      command: show run | i ip name-server 
+    register: results
+
+  - name: PRINT OUTPUT TO SCREEN 
+    ansible.builtin.debug: 
+      var: results.stdout
+
